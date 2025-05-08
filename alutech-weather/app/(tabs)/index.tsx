@@ -27,46 +27,81 @@ export default function WeatherScreen() {
     setTemperature(null);
 
     const now = new Date().toISOString().split(".")[0] + "Z";
-    const params =
+    const meteomaticsParams =
       "t_2m:C,weather_symbol_1h:idx,wind_speed_10m:ms,relative_humidity_2m:pct";
+    const meteomaticsUrl = `https://api.meteomatics.com/${now}/${meteomaticsParams}/${latitude},${longitude}/json`;
 
-    // Updated URL to fetch parameters from a different source
-    const url = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&hourly=temperature_2m,relativehumidity_2m,windspeed_10m,weathercode`;
+    const openMeteoUrl = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&hourly=temperature_2m,relativehumidity_2m,windspeed_10m,weathercode`;
 
     try {
-      console.log("Request URL:", url);
+      console.log("Requesting data from Meteomatics API:", meteomaticsUrl);
 
-      const response = await fetch(url);
+      const meteomaticsResponse = await fetch(meteomaticsUrl, {
+        headers: {
+          Authorization: "Basic " + btoa("cct_dunia_telmuun:8sMvCtA7A8"),
+        },
+      });
 
-      const contentType = response.headers.get("content-type");
-      const rawText = await response.text();
+      const meteomaticsContentType = meteomaticsResponse.headers.get("content-type");
+      const meteomaticsRawText = await meteomaticsResponse.text();
 
-      console.log("Response Status:", response.status);
-      console.log("Response Headers:", response.headers);
-      console.log("Raw Response:", rawText);
+      console.log("Meteomatics Response Status:", meteomaticsResponse.status);
+      console.log("Meteomatics Response Headers:", meteomaticsResponse.headers);
+      console.log("Meteomatics Raw Response:", meteomaticsRawText);
 
-      if (!contentType?.includes("application/json")) {
-        throw new Error("Expected JSON but got something else");
-      }
+      if (meteomaticsResponse.status === 403 || !meteomaticsContentType?.includes("application/json")) {
+        console.warn("Meteomatics API failed or is limited. Falling back to Open-Meteo API.");
 
-      const data = JSON.parse(rawText);
+        const openMeteoResponse = await fetch(openMeteoUrl);
+        const openMeteoContentType = openMeteoResponse.headers.get("content-type");
+        const openMeteoRawText = await openMeteoResponse.text();
 
-      // Adjusted to match the new API's response structure
-      const getValue = (param: string) => data?.hourly?.[param]?.[0];
+        console.log("Open-Meteo Response Status:", openMeteoResponse.status);
+        console.log("Open-Meteo Response Headers:", openMeteoResponse.headers);
+        console.log("Open-Meteo Raw Response:", openMeteoRawText);
 
-      const t = getValue("temperature_2m");
-      const h = getValue("relativehumidity_2m");
-      const w = getValue("windspeed_10m");
-      const s = getValue("weathercode");
+        if (!openMeteoContentType?.includes("application/json")) {
+          throw new Error("Expected JSON but got something else from Open-Meteo");
+        }
 
-      if (t !== undefined) {
-        setTemperature(t);
-        setHumidity(h);
-        setWindSpeed(w);
-        setConditionSymbol(s);
-        setTimestamp(new Date().toLocaleString());
+        const openMeteoData = JSON.parse(openMeteoRawText);
+
+        const getValue = (param: string) => openMeteoData?.hourly?.[param]?.[0];
+
+        const t = getValue("temperature_2m");
+        const h = getValue("relativehumidity_2m");
+        const w = getValue("windspeed_10m");
+        const s = getValue("weathercode");
+
+        if (t !== undefined) {
+          setTemperature(t);
+          setHumidity(h);
+          setWindSpeed(w);
+          setConditionSymbol(s);
+          setTimestamp(new Date().toLocaleString());
+        } else {
+          setError("Weather data unavailable.");
+        }
       } else {
-        setError("Weather data unavailable.");
+        const meteomaticsData = JSON.parse(meteomaticsRawText);
+
+        const getValue = (param: string) =>
+          meteomaticsData?.data?.find((d: any) => d.parameter === param)?.coordinates?.[0]?.dates?.[0]?.value;
+
+        const t = getValue("t_2m:C");
+        const h = getValue("relative_humidity_2m:pct");
+        const w = getValue("wind_speed_10m:ms");
+        const s = getValue("weather_symbol_1h:idx");
+
+        if (t !== undefined) {
+          setTemperature(t);
+          setHumidity(h);
+          setWindSpeed(w);
+          setConditionSymbol(s);
+          setTimestamp(new Date().toLocaleString());
+        } else {
+          setError("Weather data unavailable.");
+        }
       }
     } catch (err: any) {
       console.error("Weather fetch error:", err);
