@@ -1,4 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { LinearGradient } from "expo-linear-gradient";
 import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -10,7 +11,6 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
 
 export default function HomeScreen() {
   const [city, setCity] = useState("");
@@ -91,7 +91,7 @@ export default function HomeScreen() {
 
   return (
     <LinearGradient
-      colors={["#FFDEE9", "#B5FFFC"]}
+      colors={["#FFDEE9", "#A0CCDA"]}
       style={{ flex: 1 }}
     >
       <View style={styles.container}>
