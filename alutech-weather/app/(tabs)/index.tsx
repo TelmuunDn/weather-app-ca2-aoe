@@ -8,6 +8,8 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import Icon from "react-native-vector-icons/Feather";
+
 
 export default function WeatherScreen() {
   const [lat, setLat] = useState<string | null>(null);
@@ -153,8 +155,15 @@ export default function WeatherScreen() {
               {isFahrenheit ? "F" : "C"}
             </Text>
           </View>
-          <Text style={styles.result}>Humidity: {humidity}%</Text>
-          <Text style={styles.result}>💨{windSpeed} m/s</Text>
+          <View style={styles.iconRow}>
+            <Icon name="droplet" size={20} color="#555" />
+            <Text style={styles.result}>Humidity: {humidity}%</Text>
+          </View>
+
+          <View style={styles.iconRow}>
+            <Icon name="wind" size={20} color="#555" />
+            <Text style={styles.result}>Wind: {windSpeed} m/s</Text>
+          </View>
           {conditionSymbol !== null && (
           <View style={styles.emojiRow}>
             <Text style={styles.weatherEmoji}>{getWeatherEmoji(conditionSymbol)}</Text>
@@ -162,11 +171,11 @@ export default function WeatherScreen() {
 
           )}
           <Text style={styles.timestamp}>As of: {timestamp}</Text>
-          <TouchableOpacity onPress={() => setIsFahrenheit(!isFahrenheit)}>
-            <Text style={styles.toggle}>
-              Show in {isFahrenheit ? "Celsius" : "Fahrenheit"}
-            </Text>
+          <TouchableOpacity onPress={() => setIsFahrenheit(!isFahrenheit)} style={styles.unitToggle}>
+            <Icon name="refresh-ccw" size={16} color="#3366FF" />
+            <Text style={styles.toggle}> Show in {isFahrenheit ? "Celsius" : "Fahrenheit"}</Text>
           </TouchableOpacity>
+
         </>
       )}
     </View>
@@ -210,18 +219,10 @@ const getWeatherEmoji = (symbol: number): string => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    padding: 24,
+    flexGrow: 1,
     justifyContent: "center",
     alignItems: "center",
-    borderRadius: 20,
-    margin: 20,
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
-    shadowColor: "#000",
-    shadowOpacity: 0.2,
-    shadowRadius: 20,
-    shadowOffset: { width: 0, height: 10 },
-    backdropFilter: "blur(10px)", // Web only, not supported on native
+    padding: 20,
   },
   title: {
     fontSize: 20,
@@ -273,5 +274,17 @@ const styles = StyleSheet.create({
   },
   weatherEmoji: {
     fontSize: 80,
+  },
+  iconRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginVertical: 4,
+    gap: 6,
+  },
+  unitToggle: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 12,
   },
 });
