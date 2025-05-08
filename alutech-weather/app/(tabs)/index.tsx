@@ -146,6 +146,13 @@ export default function WeatherScreen() {
 
       {temperature !== null && (
         <>
+        {/* Emoji condition */}
+          {conditionSymbol !== null && (
+          <View style={styles.emojiRow}>
+            <Text style={styles.weatherEmoji}>{getWeatherEmoji(conditionSymbol)}</Text>
+          </View>
+          )}
+        {/* Temperature value */}
           <View style={styles.temperatureRow}>
             <Text style={styles.tempValue}>
               {isFahrenheit
@@ -155,6 +162,7 @@ export default function WeatherScreen() {
               {isFahrenheit ? "F" : "C"}
             </Text>
           </View>
+
           <View style={styles.iconRow}>
             <Icon name="droplet" size={20} color="#555" />
             <Text style={styles.result}>Humidity: {humidity}%</Text>
@@ -164,12 +172,7 @@ export default function WeatherScreen() {
             <Icon name="wind" size={20} color="#555" />
             <Text style={styles.result}>Wind: {windSpeed} m/s</Text>
           </View>
-          {conditionSymbol !== null && (
-          <View style={styles.emojiRow}>
-            <Text style={styles.weatherEmoji}>{getWeatherEmoji(conditionSymbol)}</Text>
-          </View>
-
-          )}
+        
           <Text style={styles.timestamp}>As of: {timestamp}</Text>
           <TouchableOpacity onPress={() => setIsFahrenheit(!isFahrenheit)} style={styles.unitToggle}>
             <Icon name="refresh-ccw" size={16} color="#3366FF" />
@@ -273,7 +276,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   weatherEmoji: {
-    fontSize: 80,
+    fontSize: 120,
   },
   iconRow: {
     flexDirection: "row",
