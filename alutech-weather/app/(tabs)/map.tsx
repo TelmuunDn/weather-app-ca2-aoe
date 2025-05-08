@@ -159,7 +159,7 @@ export default function HomeScreen() {
             <View style={styles.suggestionsBubble}>
               <FlatList
                 data={citySuggestions}
-                keyExtractor={(item) => item}
+                keyExtractor={(item, index) => `${item}-${index}`}
                 renderItem={({ item }) => (
                   <TouchableOpacity
                     onPress={() => handleSuggestionSelect(item)}
@@ -186,7 +186,7 @@ export default function HomeScreen() {
             <Text style={styles.subtitle}>Search History</Text>
             <FlatList
               data={searchHistory}
-              keyExtractor={(item) => item}
+              keyExtractor={(item, index) => `${item}-${index}`}
               renderItem={({ item }) => (
                 <TouchableOpacity
                   onPress={() => {
