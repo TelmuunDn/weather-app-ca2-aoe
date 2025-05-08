@@ -17,4 +17,7 @@ npm install expo-linear-gradient
 npm install lodash
 
 
+npm install react-native-vector-icons
+
+
 npx expo start --tunnel
