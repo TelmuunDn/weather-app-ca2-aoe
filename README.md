@@ -14,4 +14,7 @@ npm install @react-native-async-storage/async-storage
 npm install expo-linear-gradient
 
 
+npm install lodash
+
+
 npx expo start --tunnel
