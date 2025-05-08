@@ -163,20 +163,25 @@ export default function WeatherScreen() {
             </Text>
           </View>
 
-          <View style={styles.iconRow}>
-            <Icon name="droplet" size={20} color="#555" />
-            <Text style={styles.result}>Humidity: {humidity}%</Text>
+          <View style={styles.infoContainer}>
+            <View style={styles.infoItem}>
+              <Icon name="cloud-rain" size={20} color="#555" />
+              <Text style={styles.infoText}>{conditionSymbol}%</Text>
+              <Text style={styles.infoLabel}>Rain</Text>
+            </View>
+            <View style={styles.infoItem}>
+              <Icon name="droplet" size={20} color="#555" />
+              <Text style={styles.infoText}>{humidity}%</Text>
+              <Text style={styles.infoLabel}>Humidity</Text>
+            </View>
+            <View style={styles.infoItem}>
+              <Icon name="wind" size={20} color="#555" />
+              <Text style={styles.infoText}>{windSpeed} m/s</Text>
+              <Text style={styles.infoLabel}>Wind</Text>
+            </View>
           </View>
 
-          <View style={styles.iconRow}>
-            <Icon name="wind" size={20} color="#555" />
-            <Text style={styles.result}>Wind: {windSpeed} m/s</Text>
-          </View>
 
-          <View style={styles.iconRow}>
-            <Icon name="cloud-rain" size={20} color="#555" />
-            <Text style={styles.result}>Precipitation: {conditionSymbol}%</Text>
-          </View>
         
           <Text style={styles.timestamp}>As of: {timestamp}</Text>
           <TouchableOpacity onPress={() => setIsFahrenheit(!isFahrenheit)} style={styles.unitToggle}>
@@ -232,6 +237,43 @@ const styles = StyleSheet.create({
     alignItems: "center",
     padding: 20,
   },
+  infoContainer: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    alignItems: "center",
+    backgroundColor: "rgba(255, 255, 255, 0.3)",
+    borderRadius: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    marginVertical: 12,
+    width: "90%",
+  },
+  
+  infoItem: {
+    alignItems: "center",
+    justifyContent: "center",
+    marginHorizontal: 8,
+  },
+  
+  infoText: {
+    fontSize: 16,
+    fontWeight: "500",
+    color: "#333",
+    marginTop: 4,
+  },
+  
+  infoLabel: {
+    fontSize: 12,
+    color: "#555",
+    marginTop: 2,
+  },
+  
+  
+  infoText: {
+    fontSize: 16,
+    color: "#444",
+  },
+  
   title: {
     fontSize: 20,
     color: "#444",
