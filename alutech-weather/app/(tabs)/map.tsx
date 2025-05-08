@@ -1,5 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
+import { debounce } from "lodash";
 import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -14,17 +15,21 @@ import {
 
 export default function HomeScreen() {
   const [city, setCity] = useState("");
+  const [queriedCity, setQueriedCity] = useState("");
+  const [queriedCountry, setQueriedCountry] = useState("");
   const [temperature, setTemperature] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [searchHistory, setSearchHistory] = useState<string[]>([]);
+  const [citySuggestions, setCitySuggestions] = useState<string[]>([]);
 
   useEffect(() => {
     loadSearchHistory();
   }, []);
 
-  const saveSearchHistory = async (city: string) => {
-    const updated = [city, ...searchHistory.filter((c) => c !== city)];
+  const saveSearchHistory = async (city: string, country: string) => {
+    const cityCountry = `${city}, ${country}`;
+    const updated = [cityCountry, ...searchHistory.filter((c) => c !== cityCountry)];
     setSearchHistory(updated.slice(0, 5));
     await AsyncStorage.setItem("history", JSON.stringify(updated.slice(0, 5)));
   };
@@ -63,6 +68,9 @@ export default function HomeScreen() {
         return;
       }
 
+      setQueriedCity(location.name);
+      setQueriedCountry(location.country);
+
       const now = new Date().toISOString().split(".")[0] + "Z";
       const weatherUrl = `https://api.meteomatics.com/${now}/t_2m:C/${location.latitude},${location.longitude}/json`;
 
@@ -77,7 +85,7 @@ export default function HomeScreen() {
 
       if (value !== undefined) {
         setTemperature(value);
-        await saveSearchHistory(city);
+        await saveSearchHistory(location.name, location.country);
       } else {
         setError("Temperature data unavailable.");
       }
@@ -89,6 +97,49 @@ export default function HomeScreen() {
     }
   };
 
+  const fetchCitySuggestions = debounce(async (query: string) => {
+    if (!query) {
+      setCitySuggestions([]);
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(
+          query
+        )}&count=10`
+      ); // Fetch up to 10 cities
+      const data = await response.json();
+      const suggestions =
+        data.results?.map((result: any) => `${result.name}, ${result.country}`) || [];
+      setCitySuggestions(suggestions);
+    } catch (err) {
+      console.error("Failed to fetch city suggestions", err);
+      setCitySuggestions([]);
+    }
+  }, 300);
+
+  const handleCityInputChange = (text: string) => {
+    setCity(text);
+    fetchCitySuggestions(text);
+  };
+
+  const handleCityInputKeyPress = (event: any) => {
+    if (event.nativeEvent.key === "Enter") {
+      const selectedCity = citySuggestions.find((suggestion) => suggestion.startsWith(city));
+      if (selectedCity) {
+        setCity(selectedCity); // Update the search bar with the full city name and country
+      }
+      fetchWeatherByCity();
+    }
+  };
+
+  const handleSuggestionSelect = (suggestion: string) => {
+    setCity(suggestion);
+    setCitySuggestions([]);
+    fetchWeatherByCity();
+  };
+
   return (
     <LinearGradient
       colors={["#FFDEE9", "#A0CCDA"]}
@@ -96,18 +147,38 @@ export default function HomeScreen() {
     >
       <View style={styles.container}>
         <Text style={styles.title}>🌦️ City Weather Search</Text>
-        <TextInput
-          style={styles.input}
-          value={city}
-          onChangeText={setCity}
-          placeholder="Enter city name"
-        />
-        <Button title="Search Weather" onPress={fetchWeatherByCity} />
-
+        <View>
+          <TextInput
+            style={styles.input}
+            value={city}
+            onChangeText={handleCityInputChange}
+            onKeyPress={handleCityInputKeyPress}
+            placeholder="Enter city name"
+          />
+          {citySuggestions.length > 0 && (
+            <View style={styles.suggestionsBubble}>
+              <FlatList
+                data={citySuggestions}
+                keyExtractor={(item) => item}
+                renderItem={({ item }) => (
+                  <TouchableOpacity
+                    onPress={() => handleSuggestionSelect(item)}
+                  >
+                    <Text style={styles.suggestionItem}>{item}</Text>
+                  </TouchableOpacity>
+                )}
+                initialNumToRender={3} // Show 3 cities initially
+                style={{ maxHeight: 150 }} // Limit height for scrolling
+              />
+            </View>
+          )}
+        </View>
         {loading && <ActivityIndicator style={{ marginTop: 20 }} />}
         {error ? <Text style={styles.error}>{error}</Text> : null}
         {temperature !== null && (
-          <Text style={styles.result}>Temperature: {temperature}°C</Text>
+          <Text style={styles.result}>
+            {queriedCity}, {queriedCountry} - Temperature: {temperature}°C
+          </Text>
         )}
 
         {searchHistory.length > 0 && (
@@ -151,7 +222,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#ccc",
     padding: 10,
-    marginBottom: 10,
+    marginBottom: 100, // Increased margin to add more space for the search weather button
     borderRadius: 5,
   },
   error: {
@@ -176,5 +247,28 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: "#ddd",
     textAlign: "center",
+  },
+  suggestionItem: {
+    fontSize: 16,
+    paddingVertical: 5,
+    borderBottomWidth: 1,
+    borderBottomColor: "#ddd",
+    textAlign: "center",
+  },
+  suggestionsBubble: {
+    position: "absolute",
+    top: 50,
+    left: 0,
+    right: 0,
+    backgroundColor: "white",
+    borderRadius: 10,
+    padding: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+    zIndex: 100,
+    maxHeight: 110, // Reduced height to make the bubble vertically half as tall
   },
 });
