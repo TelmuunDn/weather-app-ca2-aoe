@@ -1,45 +1,108 @@
-import { Tabs } from 'expo-router';
-import React from 'react';
-import { Platform } from 'react-native';
+import React, { useState } from "react";
+import {
+  ActivityIndicator,
+  Button,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
 
-import { HapticTab } from '@/components/HapticTab';
-import { IconSymbol } from '@/components/ui/IconSymbol';
-import TabBarBackground from '@/components/ui/TabBarBackground';
-import { Colors } from '@/constants/Colors';
-import { useColorScheme } from '@/hooks/useColorScheme';
+// Replace with your Meteomatics credentials
+const METEOMATICS_USER = "your_username";
+const METEOMATICS_PASSWORD = "your_password";
 
-export default function TabLayout() {
-  const colorScheme = useColorScheme();
+export default function HomeScreen() {
+  const [lat, setLat] = useState("47.3769");
+  const [lon, setLon] = useState("8.5417");
+  const [temperature, setTemperature] = useState<number | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const fetchWeather = async () => {
+    setLoading(true);
+    setError("");
+    setTemperature(null);
+
+    const now = new Date().toISOString().split(".")[0] + "Z"; // e.g. 2025-05-08T12:00:00Z
+    const url = `https://api.meteomatics.com/${now}/t_2m:C/${lat},${lon}/json`;
+
+    try {
+      const response = await fetch(url, {
+        headers: {
+          Authorization: "Basic " + btoa("cct_dunia_telmuun:8sMvCtA7A8")
+,
+        },
+      });
+
+      const data = await response.json();
+
+      const value = data?.data?.[0]?.coordinates?.[0]?.dates?.[0]?.value;
+      if (value !== undefined) {
+        setTemperature(value);
+      } else {
+        setError("No temperature data found.");
+      }
+    } catch (err) {
+      setError("Error fetching data.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <Tabs
-      screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        headerShown: false,
-        tabBarButton: HapticTab,
-        tabBarBackground: TabBarBackground,
-        tabBarStyle: Platform.select({
-          ios: {
-            // Use a transparent background on iOS to show the blur effect
-            position: 'absolute',
-          },
-          default: {},
-        }),
-      }}>
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
-        }}
+    <View style={styles.container}>
+      <Text style={styles.title}>🌡️ Meteomatics Weather</Text>
+      <TextInput
+        style={styles.input}
+        value={lat}
+        onChangeText={setLat}
+        placeholder="Latitude"
       />
-      <Tabs.Screen
-        name="explore"
-        options={{
-          title: 'nnganskdnaks',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
-        }}
+      <TextInput
+        style={styles.input}
+        value={lon}
+        onChangeText={setLon}
+        placeholder="Longitude"
       />
-    </Tabs>
+      <Button title="Get Temperature" onPress={fetchWeather} />
+
+      {loading && <ActivityIndicator style={{ marginTop: 20 }} />}
+      {error ? <Text style={styles.error}>{error}</Text> : null}
+      {temperature !== null && (
+        <Text style={styles.result}>Temperature: {temperature}°C</Text>
+      )}
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    paddingTop: 80,
+    padding: 20,
+    backgroundColor: "#fff",
+    flex: 1,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginBottom: 20,
+    textAlign: "center",
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: "#ccc",
+    padding: 10,
+    marginBottom: 10,
+    borderRadius: 5,
+  },
+  error: {
+    color: "red",
+    marginTop: 10,
+  },
+  result: {
+    fontSize: 20,
+    marginTop: 20,
+    textAlign: "center",
+  },
+});
