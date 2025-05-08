@@ -104,7 +104,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: "bold",
-    marginBottom: 20,
+    marginBottom: 18,
     textAlign: "center",
   },
   error: {
@@ -113,10 +113,10 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   forecastItemContainer: {
-    marginVertical: 10, // Adds spacing between each forecast row
+    marginVertical: 6, // Adds spacing between each forecast row
     backgroundColor: "#FFFFFF", // Optional: for a background color for each row
     borderRadius: 10,
-    padding: 10,
+    padding: 20,
     shadowColor: "#000", // Optional: for shadow effect
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
