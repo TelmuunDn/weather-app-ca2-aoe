@@ -34,13 +34,23 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="Forecast"
+        name="wb-sunny"
         options={{
           title: 'Forecast',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
+          tabBarIcon: ({ color }) => (
+            <IconSymbol size={28} name="sun.max.fill" color={color} />
+          ),
         }}
       />
-      
+      <Tabs.Screen
+        name="map"
+        options={{
+          title: 'Location',
+          tabBarIcon: ({ color }) => (
+            <IconSymbol size={28} name="map.fill" color={color} />
+          ),
+        }}
+      />
     </Tabs>
   );
 }
