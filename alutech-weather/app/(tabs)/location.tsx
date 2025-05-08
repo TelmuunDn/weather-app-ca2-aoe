@@ -8,8 +8,9 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  View
+  View,
 } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
 
 export default function HomeScreen() {
   const [city, setCity] = useState("");
@@ -23,7 +24,7 @@ export default function HomeScreen() {
   }, []);
 
   const saveSearchHistory = async (city: string) => {
-    const updated = [city, ...searchHistory.filter(c => c !== city)];
+    const updated = [city, ...searchHistory.filter((c) => c !== city)];
     setSearchHistory(updated.slice(0, 5));
     await AsyncStorage.setItem("history", JSON.stringify(updated.slice(0, 5)));
   };
@@ -89,48 +90,55 @@ export default function HomeScreen() {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>🌦️ City Weather Search</Text>
-      <TextInput
-        style={styles.input}
-        value={city}
-        onChangeText={setCity}
-        placeholder="Enter city name"
-      />
-      <Button title="Search Weather" onPress={fetchWeatherByCity} />
-  
-      {loading && <ActivityIndicator style={{ marginTop: 20 }} />}
-      {error ? <Text style={styles.error}>{error}</Text> : null}
-      {temperature !== null && (
-        <Text style={styles.result}>Temperature: {temperature}°C</Text>
-      )}
-  
-      {searchHistory.length > 0 && (
-        <View style={{ marginTop: 30 }}>
-          <Text style={styles.subtitle}>Search History</Text>
-          <FlatList
-            data={searchHistory}
-            keyExtractor={(item) => item}
-            renderItem={({ item }) => (
-              <TouchableOpacity onPress={() => { setCity(item); fetchWeatherByCity(); }}>
-                <Text style={styles.historyItem}>{item}</Text>
-              </TouchableOpacity>
-            )}
-          />
-          <Button title="Clear History" onPress={clearSearchHistory} />
-        </View>
-      )}
-    </View>
-  );
-  
-}
+    <LinearGradient
+      colors={["#FFDEE9", "#B5FFFC"]}
+      style={{ flex: 1 }}
+    >
+      <View style={styles.container}>
+        <Text style={styles.title}>🌦️ City Weather Search</Text>
+        <TextInput
+          style={styles.input}
+          value={city}
+          onChangeText={setCity}
+          placeholder="Enter city name"
+        />
+        <Button title="Search Weather" onPress={fetchWeatherByCity} />
 
+        {loading && <ActivityIndicator style={{ marginTop: 20 }} />}
+        {error ? <Text style={styles.error}>{error}</Text> : null}
+        {temperature !== null && (
+          <Text style={styles.result}>Temperature: {temperature}°C</Text>
+        )}
+
+        {searchHistory.length > 0 && (
+          <View style={{ marginTop: 30 }}>
+            <Text style={styles.subtitle}>Search History</Text>
+            <FlatList
+              data={searchHistory}
+              keyExtractor={(item) => item}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  onPress={() => {
+                    setCity(item);
+                    fetchWeatherByCity();
+                  }}
+                >
+                  <Text style={styles.historyItem}>{item}</Text>
+                </TouchableOpacity>
+              )}
+            />
+            <Button title="Clear History" onPress={clearSearchHistory} />
+          </View>
+        )}
+      </View>
+    </LinearGradient>
+  );
+}
 
 const styles = StyleSheet.create({
   container: {
     paddingTop: 80,
     padding: 20,
-    backgroundColor: "#fff",
     flex: 1,
   },
   title: {
@@ -170,4 +178,3 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
 });
-
