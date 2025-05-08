@@ -14,7 +14,7 @@ export default function TabTwoScreen() {
     try {
       const latitude = "53.3498"; // Example latitude for Dublin
       const longitude = "-6.2603"; // Example longitude for Dublin
-      const forecastUrl = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&daily=temperature_2m_max,temperature_2m_min,weathercode&timezone=auto`;
+      const forecastUrl = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&daily=temperature_2m_max,temperature_2m_min,weathercode,precipitation_probability_mean&timezone=auto`;
 
       const response = await fetch(forecastUrl);
       const data = await response.json();
@@ -26,6 +26,7 @@ export default function TabTwoScreen() {
             maxTemp: data.daily.temperature_2m_max[index],
             minTemp: data.daily.temperature_2m_min[index],
             weatherCode: data.daily.weathercode[index],
+            precipitationProbability: data.daily.precipitation_probability_mean[index],
           }))
         );
       } else {
@@ -86,6 +87,7 @@ export default function TabTwoScreen() {
               <Text style={styles.date}>{item.date}</Text>
               <Text style={styles.emoji}>{getWeatherEmoji(item.weatherCode)}</Text>
               <Text style={styles.temp}>{item.maxTemp}°C / {item.minTemp}°C</Text>
+              <Text style={styles.precipitation}>💧 {item.precipitationProbability}%</Text>
             </View>
           )}
         />
@@ -129,5 +131,9 @@ const styles = StyleSheet.create({
   temp: {
     fontSize: 16,
     color: "#555",
+  },
+  precipitation: {
+    fontSize: 14,
+    color: "#007BFF",
   },
 });
