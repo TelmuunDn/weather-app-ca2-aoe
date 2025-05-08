@@ -3,6 +3,8 @@ import * as Location from "expo-location";
 import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
+  RefreshControl,
+  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -10,10 +12,10 @@ import {
 } from "react-native";
 import Icon from "react-native-vector-icons/Feather";
 
-
 export default function WeatherScreen() {
   const [lat, setLat] = useState<string | null>(null);
   const [lon, setLon] = useState<string | null>(null);
+  const [city, setCity] = useState<string | null>(null);
   const [temperature, setTemperature] = useState<number | null>(null);
   const [humidity, setHumidity] = useState<number | null>(null);
   const [windSpeed, setWindSpeed] = useState<number | null>(null);
@@ -22,6 +24,7 @@ export default function WeatherScreen() {
   const [isFahrenheit, setIsFahrenheit] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [refreshing, setRefreshing] = useState(false);
 
   const fetchWeather = async (latitude: string, longitude: string) => {
     setLoading(true);
@@ -113,6 +116,25 @@ export default function WeatherScreen() {
     }
   };
 
+  const fetchCity = async () => {
+    try {
+      const response = await fetch("https://ipapi.co/json/");
+      const data = await response.json();
+      setCity(`${data.city || "Unknown City"}, ${data.country_name || "Unknown Country"}`);
+    } catch (err) {
+      console.error("Error fetching city name:", err);
+      setCity("Unknown City, Unknown Country");
+    }
+  };
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    if (lat && lon) {
+      await fetchWeather(lat, lon);
+    }
+    setRefreshing(false);
+  };
+
   useEffect(() => {
     const getLocation = async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
@@ -127,6 +149,7 @@ export default function WeatherScreen() {
 
       setLat(latitude);
       setLon(longitude);
+      fetchCity();
       fetchWeather(latitude, longitude);
     };
 
@@ -135,63 +158,65 @@ export default function WeatherScreen() {
 
   return (
     <LinearGradient
-    colors={["#FFDEE9", "#A0CCDA"]} // Background gradient colors
-    style={{ flex: 1 }}
-  >
-    <View style={styles.container}>
-      <Text style={styles.title}>Name of the city here</Text>
+      colors={["#FFDEE9", "#A0CCDA"]} // Background gradient colors
+      style={{ flex: 1 }}
+    >
+      <ScrollView
+        contentContainerStyle={{ flexGrow: 1 }}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+      >
+        <View style={styles.container}>
+          <Text style={styles.title}>{city || "Loading Local Weather Data..."}</Text>
 
-      {loading && <ActivityIndicator style={{ marginTop: 20 }} />}
-      {error ? <Text style={styles.error}>{error}</Text> : null}
+          {loading && <ActivityIndicator style={{ marginTop: 20 }} />}
+          {error ? <Text style={styles.error}>{error}</Text> : null}
 
-      {temperature !== null && (
-        <>
-        {/* Emoji condition */}
-          {conditionSymbol !== null && (
-          <View style={styles.emojiRow}>
-            <Text style={styles.weatherEmoji}>{getWeatherEmoji(conditionSymbol)}</Text>
-          </View>
+          {temperature !== null && (
+            <>
+              {/* Emoji condition */}
+              {conditionSymbol !== null && (
+                <View style={styles.emojiRow}>
+                  <Text style={styles.weatherEmoji}>{getWeatherEmoji(conditionSymbol)}</Text>
+                </View>
+              )}
+              {/* Temperature value */}
+              <View style={styles.temperatureRow}>
+                <Text style={styles.tempValue}>
+                  {isFahrenheit
+                    ? ((temperature * 9) / 5 + 32).toFixed(1)
+                    : temperature.toFixed(1)}
+                  °
+                  {isFahrenheit ? "F" : "C"}
+                </Text>
+              </View>
+
+              <View style={styles.infoContainer}>
+                <View style={styles.infoItem}>
+                  <Icon name="cloud-rain" size={20} color="#555" />
+                  <Text style={styles.infoText}>{conditionSymbol}%</Text>
+                  <Text style={styles.infoLabel}>Rain</Text>
+                </View>
+                <View style={styles.infoItem}>
+                  <Icon name="droplet" size={20} color="#555" />
+                  <Text style={styles.infoText}>{humidity}%</Text>
+                  <Text style={styles.infoLabel}>Humidity</Text>
+                </View>
+                <View style={styles.infoItem}>
+                  <Icon name="wind" size={20} color="#555" />
+                  <Text style={styles.infoText}>{windSpeed} m/s</Text>
+                  <Text style={styles.infoLabel}>Wind</Text>
+                </View>
+              </View>
+
+              <Text style={styles.timestamp}>As of: {timestamp}</Text>
+              <TouchableOpacity onPress={() => setIsFahrenheit(!isFahrenheit)} style={styles.unitToggle}>
+                <Icon name="refresh-ccw" size={16} color="#3366FF" />
+                <Text style={styles.toggle}> Show in {isFahrenheit ? "Celsius" : "Fahrenheit"}</Text>
+              </TouchableOpacity>
+            </>
           )}
-        {/* Temperature value */}
-          <View style={styles.temperatureRow}>
-            <Text style={styles.tempValue}>
-              {isFahrenheit
-                ? ((temperature * 9) / 5 + 32).toFixed(1)
-                : temperature.toFixed(1)}
-              °
-              {isFahrenheit ? "F" : "C"}
-            </Text>
-          </View>
-
-          <View style={styles.infoContainer}>
-            <View style={styles.infoItem}>
-              <Icon name="cloud-rain" size={20} color="#555" />
-              <Text style={styles.infoText}>{conditionSymbol}%</Text>
-              <Text style={styles.infoLabel}>Rain</Text>
-            </View>
-            <View style={styles.infoItem}>
-              <Icon name="droplet" size={20} color="#555" />
-              <Text style={styles.infoText}>{humidity}%</Text>
-              <Text style={styles.infoLabel}>Humidity</Text>
-            </View>
-            <View style={styles.infoItem}>
-              <Icon name="wind" size={20} color="#555" />
-              <Text style={styles.infoText}>{windSpeed} m/s</Text>
-              <Text style={styles.infoLabel}>Wind</Text>
-            </View>
-          </View>
-
-
-        
-          <Text style={styles.timestamp}>As of: {timestamp}</Text>
-          <TouchableOpacity onPress={() => setIsFahrenheit(!isFahrenheit)} style={styles.unitToggle}>
-            <Icon name="refresh-ccw" size={16} color="#3366FF" />
-            <Text style={styles.toggle}> Show in {isFahrenheit ? "Celsius" : "Fahrenheit"}</Text>
-          </TouchableOpacity>
-
-        </>
-      )}
-    </View>
+        </View>
+      </ScrollView>
     </LinearGradient>
   );
 }
