@@ -139,7 +139,7 @@ export default function WeatherScreen() {
     style={{ flex: 1 }}
   >
     <View style={styles.container}>
-      <Text style={styles.title}>🌡️ Current Weather</Text>
+      <Text style={styles.title}>Name of the city here</Text>
 
       {loading && <ActivityIndicator style={{ marginTop: 20 }} />}
       {error ? <Text style={styles.error}>{error}</Text> : null}
