@@ -69,10 +69,7 @@ export default function TabTwoScreen() {
   };
 
   return (
-    <LinearGradient
-      colors={["#FFDEE9", "#A0CCDA"]}
-      style={{ flex: 1 }}
-    >
+    <LinearGradient colors={["#FFDEE9", "#A0CCDA"]} style={{ flex: 1 }}>
       <View style={styles.container}>
         <Text style={styles.title}>5-Day Weather Forecast</Text>
 
@@ -83,11 +80,13 @@ export default function TabTwoScreen() {
           data={forecast}
           keyExtractor={(item) => item.date}
           renderItem={({ item }) => (
-            <View style={styles.forecastItem}>
-              <Text style={styles.date}>{item.date}</Text>
-              <Text style={styles.emoji}>{getWeatherEmoji(item.weatherCode)}</Text>
-              <Text style={styles.temp}>{item.maxTemp}°C / {item.minTemp}°C</Text>
-              <Text style={styles.precipitation}>💧 {item.precipitationProbability}%</Text>
+            <View style={styles.forecastItemContainer}>
+              <View style={styles.forecastItem}>
+                <Text style={styles.date}>{item.date}</Text>
+                <Text style={styles.emoji}>{getWeatherEmoji(item.weatherCode)}</Text>
+                <Text style={styles.temp}>{item.maxTemp}°C / {item.minTemp}°C</Text>
+                <Text style={styles.precipitation}>💧 {item.precipitationProbability}%</Text>
+              </View>
             </View>
           )}
         />
@@ -113,17 +112,25 @@ const styles = StyleSheet.create({
     marginTop: 10,
     textAlign: "center",
   },
+  forecastItemContainer: {
+    marginVertical: 10, // Adds spacing between each forecast row
+    backgroundColor: "#FFFFFF", // Optional: for a background color for each row
+    borderRadius: 10,
+    padding: 10,
+    shadowColor: "#000", // Optional: for shadow effect
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
   forecastItem: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: "#ddd",
   },
   date: {
     fontSize: 16,
     color: "#333",
+    flex: 1,
   },
   emoji: {
     fontSize: 24,
@@ -131,9 +138,13 @@ const styles = StyleSheet.create({
   temp: {
     fontSize: 16,
     color: "#555",
+    flex: 1,
+    textAlign: "center",
   },
   precipitation: {
     fontSize: 14,
     color: "#007BFF",
+    flex: 1,
+    textAlign: "right",
   },
 });
