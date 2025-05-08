@@ -1,75 +1,109 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import React, { useState } from "react";
+import {
+  ActivityIndicator,
+  Button,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
 
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+// Replace with your Meteomatics credentials
+const METEOMATICS_USER = "your_username";
+const METEOMATICS_PASSWORD = "your_password";
 
 export default function HomeScreen() {
+  const [lat, setLat] = useState("47.3769");
+  const [lon, setLon] = useState("8.5417");
+  const [temperature, setTemperature] = useState<number | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const fetchWeather = async () => {
+    setLoading(true);
+    setError("");
+    setTemperature(null);
+
+    const now = new Date().toISOString().split(".")[0] + "Z"; // e.g. 2025-05-08T12:00:00Z
+    const url = `https://api.meteomatics.com/${now}/t_2m:C/${lat},${lon}/json`;
+
+    try {
+      const response = await fetch(url, {
+        headers: {
+          Authorization: "Basic " + btoa("cct_dunia_telmuun:8sMvCtA7A8")
+
+            
+        },
+      });
+
+      const data = await response.json();
+
+      const value = data?.data?.[0]?.coordinates?.[0]?.dates?.[0]?.value;
+      if (value !== undefined) {
+        setTemperature(value);
+      } else {
+        setError("No temperature data found.");
+      }
+    } catch (err) {
+      setError("Error fetching data.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+    <View style={styles.container}>
+      <Text style={styles.title}>🌡️ Meteomatics Weather</Text>
+      <TextInput
+        style={styles.input}
+        value={lat}
+        onChangeText={setLat}
+        placeholder="Latitude"
+      />
+      <TextInput
+        style={styles.input}
+        value={lon}
+        onChangeText={setLon}
+        placeholder="Longitude"
+      />
+      <Button title="Get Temperature" onPress={fetchWeather} />
+
+      {loading && <ActivityIndicator style={{ marginTop: 20 }} />}
+      {error ? <Text style={styles.error}>{error}</Text> : null}
+      {temperature !== null && (
+        <Text style={styles.result}>Temperature: {temperature}°C</Text>
+      )}
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+  container: {
+    paddingTop: 80,
+    padding: 20,
+    backgroundColor: "#fff",
+    flex: 1,
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginBottom: 20,
+    textAlign: "center",
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  input: {
+    borderWidth: 1,
+    borderColor: "#ccc",
+    padding: 10,
+    marginBottom: 10,
+    borderRadius: 5,
+  },
+  error: {
+    color: "red",
+    marginTop: 10,
+  },
+  result: {
+    fontSize: 20,
+    marginTop: 20,
+    textAlign: "center",
   },
 });
