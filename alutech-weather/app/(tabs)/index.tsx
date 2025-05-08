@@ -144,19 +144,22 @@ export default function WeatherScreen() {
 
       {temperature !== null && (
         <>
-          <Text style={styles.result}>
-            Temperature:{" "}
-            {isFahrenheit
-              ? ((temperature * 9) / 5 + 32).toFixed(1)
-              : temperature.toFixed(1)}
-            °{isFahrenheit ? "F" : "C"}
-          </Text>
-          <Text style={styles.result}>Humidity: {humidity}%</Text>
-          <Text style={styles.result}>Wind Speed: {windSpeed} m/s</Text>
-          {conditionSymbol !== null && (
-            <Text style={styles.result}>
-              Condition: {getWeatherEmoji(conditionSymbol)}
+          <View style={styles.temperatureRow}>
+            <Text style={styles.tempValue}>
+              {isFahrenheit
+                ? ((temperature * 9) / 5 + 32).toFixed(1)
+                : temperature.toFixed(1)}
+              °
+              {isFahrenheit ? "F" : "C"}
             </Text>
+          </View>
+          <Text style={styles.result}>Humidity: {humidity}%</Text>
+          <Text style={styles.result}>💨{windSpeed} m/s</Text>
+          {conditionSymbol !== null && (
+          <View style={styles.emojiRow}>
+            <Text style={styles.weatherEmoji}>{getWeatherEmoji(conditionSymbol)}</Text>
+          </View>
+
           )}
           <Text style={styles.timestamp}>As of: {timestamp}</Text>
           <TouchableOpacity onPress={() => setIsFahrenheit(!isFahrenheit)}>
@@ -239,4 +242,25 @@ const styles = StyleSheet.create({
     marginTop: 10,
     textDecorationLine: "underline",
   },
+  temperatureRow: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 10,
+  },
+  tempValue: {
+    fontSize: 90,
+    fontWeight: "bold",
+    marginLeft: 8,
+  },
+  emojiRow: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 10,
+  },
+  weatherEmoji: {
+    fontSize: 120,
+    marginLeft: 8,
+  },  
 });
