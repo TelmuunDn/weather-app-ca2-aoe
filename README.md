@@ -1,3 +1,6 @@
+npm install expo
+
+
 npx expo install expo-location
 
 
