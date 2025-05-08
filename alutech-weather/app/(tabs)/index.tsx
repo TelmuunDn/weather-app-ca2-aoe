@@ -9,8 +9,7 @@ import {
 } from "react-native";
 
 // Replace with your Meteomatics credentials
-const METEOMATICS_USER = "your_username";
-const METEOMATICS_PASSWORD = "your_password";
+
 
 export default function HomeScreen() {
   const [lat, setLat] = useState("47.3769");
