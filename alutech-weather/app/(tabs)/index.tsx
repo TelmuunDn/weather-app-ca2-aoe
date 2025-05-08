@@ -1,4 +1,5 @@
 import * as Location from "expo-location";
+import { LinearGradient } from "expo-linear-gradient";
 import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -72,6 +73,10 @@ export default function HomeScreen() {
   }, []);
 
   return (
+    <LinearGradient
+    colors={["#FFDEE9", "#A0CCDA"]} // Background gradient colors
+    style={{ flex: 1 }}
+  >
     <View style={styles.container}>
       <Text style={styles.title}>🌡️ Meteomatics Weather</Text>
 
@@ -82,6 +87,7 @@ export default function HomeScreen() {
         <Text style={styles.result}>Temperature: {temperature}°C</Text>
       )}
     </View>
+    </LinearGradient>
   );
 }
 
@@ -89,7 +95,6 @@ const styles = StyleSheet.create({
   container: {
     paddingTop: 80,
     padding: 20,
-    backgroundColor: "#fff",
     flex: 1,
   },
   title: {
