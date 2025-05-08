@@ -210,14 +210,36 @@ const getWeatherEmoji = (symbol: number): string => {
 
 const styles = StyleSheet.create({
   container: {
-    paddingTop: 80,
-    padding: 20,
     flex: 1,
+    padding: 24,
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 20,
+    margin: 20,
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    shadowColor: "#000",
+    shadowOpacity: 0.2,
+    shadowRadius: 20,
+    shadowOffset: { width: 0, height: 10 },
+    backdropFilter: "blur(10px)", // Web only, not supported on native
   },
   title: {
-    fontSize: 24,
+    fontSize: 20,
+    color: "#444",
+    textAlign: "center",
+    marginBottom: 10,
+    fontWeight: "600",
+  },
+  tempValue: {
+    fontSize: 100,
+    color: "#333",
     fontWeight: "bold",
-    marginBottom: 20,
+    textAlign: "center",
+  },
+  result: {
+    fontSize: 18,
+    color: "#666",
+    marginVertical: 4,
     textAlign: "center",
   },
   error: {
@@ -225,42 +247,31 @@ const styles = StyleSheet.create({
     marginTop: 10,
     textAlign: "center",
   },
-  result: {
-    fontSize: 18,
-    marginTop: 10,
-    textAlign: "center",
-  },
   timestamp: {
     fontSize: 14,
-    color: "#555",
+    color: "#aaa",
     marginTop: 10,
     textAlign: "center",
   },
   toggle: {
-    color: "#007bff",
+    color: "#3366FF",
     textAlign: "center",
-    marginTop: 10,
+    marginTop: 12,
+    fontSize: 16,
+    fontWeight: "500",
     textDecorationLine: "underline",
   },
   temperatureRow: {
     flexDirection: "row",
-    justifyContent: "center",
     alignItems: "center",
-    marginTop: 10,
-  },
-  tempValue: {
-    fontSize: 90,
-    fontWeight: "bold",
-    marginLeft: 8,
+    justifyContent: "center",
+    marginBottom: 20,
   },
   emojiRow: {
-    flexDirection: "row",
-    justifyContent: "center",
+    marginVertical: 12,
     alignItems: "center",
-    marginTop: 10,
   },
   weatherEmoji: {
-    fontSize: 120,
-    marginLeft: 8,
-  },  
+    fontSize: 80,
+  },
 });
