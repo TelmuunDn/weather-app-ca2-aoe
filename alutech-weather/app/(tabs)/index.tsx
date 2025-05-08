@@ -172,6 +172,11 @@ export default function WeatherScreen() {
             <Icon name="wind" size={20} color="#555" />
             <Text style={styles.result}>Wind: {windSpeed} m/s</Text>
           </View>
+
+          <View style={styles.iconRow}>
+            <Icon name="cloud-rain" size={20} color="#555" />
+            <Text style={styles.result}>Precipitation: {conditionSymbol}%</Text>
+          </View>
         
           <Text style={styles.timestamp}>As of: {timestamp}</Text>
           <TouchableOpacity onPress={() => setIsFahrenheit(!isFahrenheit)} style={styles.unitToggle}>
