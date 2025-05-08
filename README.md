@@ -1,1 +1,1 @@
-expo install expo-location
+npm expo install expo-location
