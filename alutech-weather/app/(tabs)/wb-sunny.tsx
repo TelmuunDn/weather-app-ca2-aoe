@@ -12,8 +12,8 @@ export default function TabTwoScreen() {
     setError("");
 
     try {
-      const latitude = "53.3498"; // Example latitude for Dublin
-      const longitude = "-6.2603"; // Example longitude for Dublin
+      const latitude = "53.3498";
+      const longitude = "-6.2603";
       const forecastUrl = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&daily=temperature_2m_max,temperature_2m_min,weathercode,precipitation_probability_mean&timezone=auto`;
 
       const response = await fetch(forecastUrl);
@@ -44,28 +44,18 @@ export default function TabTwoScreen() {
     fetchForecast();
   }, []);
 
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return `${date.getDate()} ${date.toLocaleString("default", { month: "long" })}`;
+  };
+
   const getWeatherEmoji = (code: number): string => {
     const map: { [key: number]: string } = {
-      0: "☀️", // Clear sky
-      1: "🌤️", // Mainly clear
-      2: "⛅", // Partly cloudy
-      3: "☁️", // Overcast
-      45: "🌫️", // Fog
-      48: "🌫️", // Depositing rime fog
-      51: "🌦️", // Drizzle: Light
-      53: "🌦️", // Drizzle: Moderate
-      55: "🌦️", // Drizzle: Dense
-      61: "🌧️", // Rain: Slight
-      63: "🌧️", // Rain: Moderate
-      65: "🌧️", // Rain: Heavy
-      80: "🌧️", // Rain showers: Slight
-      81: "🌧️", // Rain showers: Moderate
-      82: "🌧️", // Rain showers: Violent
-      95: "🌩️", // Thunderstorm: Slight or moderate
-      96: "🌩️", // Thunderstorm with slight hail
-      99: "🌩️", // Thunderstorm with heavy hail
+      0: "☀️", 1: "🌤️", 2: "⛅", 3: "☁️", 45: "🌫️", 48: "🌫️",
+      51: "🌦️", 53: "🌦️", 55: "🌦️", 61: "🌧️", 63: "🌧️", 65: "🌧️",
+      80: "🌧️", 81: "🌧️", 82: "🌧️", 95: "🌩️", 96: "🌩️", 99: "🌩️",
     };
-    return map[code] || "❓"; // Default to ❓ if the code is not mapped
+    return map[code] || "❓";
   };
 
   return (
@@ -82,10 +72,12 @@ export default function TabTwoScreen() {
           renderItem={({ item }) => (
             <View style={styles.forecastItemContainer}>
               <View style={styles.forecastItem}>
-                <Text style={styles.date}>{item.date}</Text>
+                <Text style={styles.date}>{formatDate(item.date)}</Text>
                 <Text style={styles.emoji}>{getWeatherEmoji(item.weatherCode)}</Text>
-                <Text style={styles.temp}>{item.maxTemp}°C / {item.minTemp}°C</Text>
-                <Text style={styles.precipitation}>💧 {item.precipitationProbability}%</Text>
+                <Text style={styles.temp}>
+                  {Math.round(item.maxTemp)}°C / {Math.round(item.minTemp)}°C
+                </Text>
+                <Text style={styles.precipitation}>💧 {Math.round(item.precipitationProbability)}%</Text>
               </View>
             </View>
           )}
@@ -113,11 +105,11 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   forecastItemContainer: {
-    marginVertical: 6, // Adds spacing between each forecast row
-    backgroundColor: "#FFFFFF", // Optional: for a background color for each row
+    marginVertical: 6,
+    backgroundColor: "#FFFFFF",
     borderRadius: 10,
     padding: 20,
-    shadowColor: "#000", // Optional: for shadow effect
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -136,15 +128,17 @@ const styles = StyleSheet.create({
     fontSize: 24,
   },
   temp: {
-    fontSize: 16,
+    fontSize: 18,
     color: "#555",
     flex: 1,
     textAlign: "center",
+    fontWeight: "600",
   },
   precipitation: {
-    fontSize: 14,
+    fontSize: 16,
     color: "#007BFF",
     flex: 1,
     textAlign: "right",
+    fontWeight: "500",
   },
 });
