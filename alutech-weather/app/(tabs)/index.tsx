@@ -133,7 +133,6 @@ const fetchCity = async () => {
   }
 }
 
-
   const onRefresh = async () => {
     setRefreshing(true);
     if (lat && lon) {
@@ -190,8 +189,8 @@ const fetchCity = async () => {
               <View style={styles.temperatureRow}>
                 <Text style={styles.tempValue}>
                   {isFahrenheit
-                    ? ((temperature * 9) / 5 + 32).toFixed(1)
-                    : temperature.toFixed(1)}
+                    ? Math.round((temperature * 9) / 5 + 32)
+                    : Math.round(temperature)}
                   °
                   {isFahrenheit ? "F" : "C"}
                 </Text>
@@ -265,7 +264,6 @@ const getWeatherEmoji = (symbol: number): string => {
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
-    justifyContent: "center",
     paddingTop: 70,
     alignItems: "center",
     padding: 20,
