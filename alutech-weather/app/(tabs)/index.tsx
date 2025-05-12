@@ -116,16 +116,23 @@ export default function WeatherScreen() {
     }
   };
 
-  const fetchCity = async () => {
-    try {
-      const response = await fetch("https://ipapi.co/json/");
-      const data = await response.json();
-      setCity(`${data.city || "Unknown City"}, ${data.country_name || "Unknown Country"}`);
-    } catch (err) {
-      console.error("Error fetching city name:", err);
-      setCity("Unknown City, Unknown Country");
-    }
-  };
+const fetchCity = async () => {
+  try {
+    const { coords } = await Location.getCurrentPositionAsync({});
+    const [place] = await Location.reverseGeocodeAsync({
+      latitude: coords.latitude,
+      longitude: coords.longitude,
+    });
+
+    const cityName = place.city || place.name || "Unknown City";
+    const countryName = place.country || "Unknown Country";
+    setCity(`${cityName}, ${countryName}`);
+  } catch (err) {
+    console.error("Reverse geocoding failed:", err);
+    setCity("Unknown City, Unknown Country");
+  }
+}
+
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -259,6 +266,7 @@ const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
     justifyContent: "center",
+    paddingTop: 70,
     alignItems: "center",
     padding: 20,
   },
