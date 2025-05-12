@@ -19,6 +19,7 @@ npm install lodash
 
 npm install react-native-vector-icons
 
+npx expo install expo-font
 
 npx expo start --tunnel
 
