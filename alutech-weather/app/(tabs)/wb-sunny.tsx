@@ -2,11 +2,14 @@ import { LinearGradient } from "expo-linear-gradient";
 import React, { useEffect, useState } from "react";
 import { ActivityIndicator, FlatList, StyleSheet, Text, View } from "react-native";
 
+// 5-day weather forecast screen for a fixed location (Dublin)
 export default function TabTwoScreen() {
+  // State for forecast data, loading, and error
   const [forecast, setForecast] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  // Fetch 5-day forecast from Open-Meteo API for Dublin
   const fetchForecast = async () => {
     setLoading(true);
     setError("");
@@ -20,6 +23,7 @@ export default function TabTwoScreen() {
       const data = await response.json();
 
       if (data?.daily) {
+        // Transform API response into array of daily forecast objects
         setForecast(
           data.daily.time.map((date: string, index: number) => ({
             date,
@@ -40,15 +44,18 @@ export default function TabTwoScreen() {
     }
   };
 
+  // Fetch forecast on mount
   useEffect(() => {
     fetchForecast();
   }, []);
 
+  // Format date for display (e.g., 15 May)
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return `${date.getDate()} ${date.toLocaleString("default", { month: "long" })}`;
   };
 
+  // Map weather code to emoji for display
   const getWeatherEmoji = (code: number): string => {
     const map: { [key: number]: string } = {
       0: "☀️", 1: "🌤️", 2: "⛅", 3: "☁️", 45: "🌫️", 48: "🌫️",
@@ -59,13 +66,17 @@ export default function TabTwoScreen() {
   };
 
   return (
+    // Gradient background for visual appeal
     <LinearGradient colors={["#FFDEE9", "#A0CCDA"]} style={{ flex: 1 }}>
       <View style={styles.container}>
+        {/* Title */}
         <Text style={styles.title}>5-Day Weather Forecast</Text>
 
+        {/* Loading spinner and error message */}
         {loading && <ActivityIndicator style={{ marginTop: 20 }} />}
         {error ? <Text style={styles.error}>{error}</Text> : null}
 
+        {/* Forecast list */}
         <FlatList
           data={forecast}
           keyExtractor={(item) => item.date}
@@ -87,6 +98,7 @@ export default function TabTwoScreen() {
   );
 }
 
+// Styles for the forecast screen
 const styles = StyleSheet.create({
   container: {
     paddingTop: 80,

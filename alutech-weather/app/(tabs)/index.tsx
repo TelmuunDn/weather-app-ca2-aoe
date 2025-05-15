@@ -14,7 +14,9 @@ import {
 } from "react-native";
 import Icon from "react-native-vector-icons/Feather";
 
+// Main weather screen: shows current weather for user's location
 export default function WeatherScreen() {
+  // State variables for location, weather data, UI state, etc.
   const [lat, setLat] = useState<string | null>(null);
   const [lon, setLon] = useState<string | null>(null);
   const [city, setCity] = useState<string | null>(null);
@@ -29,7 +31,7 @@ export default function WeatherScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [fontsLoaded, setFontsLoaded] = useState(false);
 
-  // New helper function to format the timestamp as "May-15 10:26"
+  // Helper to format timestamp for display (e.g., May-15 10:26)
   const formatTimestamp = (): string => {
     const now = new Date();
     const options: Intl.DateTimeFormatOptions = {
@@ -46,6 +48,7 @@ export default function WeatherScreen() {
       .replace(" ", "-");
   };
 
+  // Update all weather-related state at once
   const updateWeatherState = (t: number, h: number, w: number, s: number) => {
     setTemperature(t);
     setHumidity(h);
@@ -54,6 +57,7 @@ export default function WeatherScreen() {
     setTimestamp(formatTimestamp());
   };
 
+  // Fetch weather data from Meteomatics API, fallback to Open-Meteo if needed
   const fetchWeather = async (latitude: string, longitude: string) => {
     setLoading(true);
     setError("");
@@ -65,6 +69,7 @@ export default function WeatherScreen() {
     const meteomaticsUrl = `https://api.meteomatics.com/${now}/${meteomaticsParams}/${latitude},${longitude}/json`;
 
     try {
+      // Try Meteomatics API first
       const meteomaticsResponse = await fetch(meteomaticsUrl, {
         headers: {
           Authorization: "Basic " + btoa("cct_dunia_telmuun:8sMvCtA7A8"),
@@ -96,7 +101,7 @@ export default function WeatherScreen() {
         throw new Error("Meteomatics data missing values");
       }
     } catch (err) {
-      // fallback to Open-Meteo
+      // If Meteomatics fails, fallback to Open-Meteo API
       try {
         const openMeteoUrl = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&hourly=temperature_2m,relativehumidity_2m,windspeed_10m,weathercode`;
         const openMeteoResponse = await fetch(openMeteoUrl);
@@ -128,6 +133,7 @@ export default function WeatherScreen() {
     }
   };
 
+  // Fetch city/country name from coordinates using reverse geocoding
   const fetchCity = async () => {
     try {
       const { coords } = await Location.getCurrentPositionAsync({});
@@ -161,6 +167,7 @@ export default function WeatherScreen() {
     }
   };
 
+  // Pull-to-refresh handler: re-fetch weather
   const onRefresh = async () => {
     setRefreshing(true);
     if (lat && lon) {
@@ -169,6 +176,7 @@ export default function WeatherScreen() {
     setRefreshing(false);
   };
 
+  // On mount: request location permission, get location, fetch city and weather
   useEffect(() => {
     (async () => {
       const { status } = await Location.requestForegroundPermissionsAsync();
@@ -188,16 +196,20 @@ export default function WeatherScreen() {
     })();
   }, []);
 
+  // Load custom font on mount
   useEffect(() => {
     Font.loadAsync({
       "AlumniSansPinstripe-Regular": require("../../assets/fonts/AlumniSansPinstripe-Regular.ttf"),
     }).then(() => setFontsLoaded(true));
   }, []);
 
+  // Show nothing until font is loaded
   if (!fontsLoaded) return null;
 
   return (
+    // Gradient background for visual appeal
     <LinearGradient colors={["#FFDEE9", "#d8fcff"]} style={{ flex: 1 }}>
+      {/* Main scrollable content with pull-to-refresh */}
       <ScrollView
         contentContainerStyle={{ flexGrow: 1 }}
         refreshControl={
@@ -205,17 +217,20 @@ export default function WeatherScreen() {
         }
       >
         <View style={styles.container}>
+          {/* City name and timestamp */}
           <Text style={styles.title}>
             {city || "Loading Local Weather Data..."}
           </Text>
-
           <Text style={styles.timestamp}>{timestamp}</Text>
 
+          {/* Loading spinner and error message */}
           {loading && <ActivityIndicator style={{ marginTop: 20 }} />}
           {error ? <Text style={styles.error}>{error}</Text> : null}
 
+          {/* Weather data display */}
           {temperature !== null && (
             <>
+              {/* Weather emoji for current condition */}
               {conditionSymbol !== null && (
                 <View style={styles.emojiRow}>
                   <Text style={styles.weatherEmoji}>
@@ -223,6 +238,7 @@ export default function WeatherScreen() {
                   </Text>
                 </View>
               )}
+              {/* Temperature value and unit toggle */}
               <View style={styles.temperatureRow}>
                 <Text style={styles.tempValue}>
                   {isFahrenheit
@@ -232,19 +248,18 @@ export default function WeatherScreen() {
                 </Text>
               </View>
 
+              {/* Weather info: rain, humidity, wind */}
               <View style={styles.infoContainer}>
                 <View style={styles.infoItem}>
                   <Icon name="cloud-rain" size={20} color="#555" />
                   <Text style={styles.infoText}>{Math.round(conditionSymbol ?? 0)}%</Text>
                   <Text style={styles.infoLabel}>Rain</Text>
                 </View>
-
                 <View style={styles.infoItem}>
                   <Icon name="droplet" size={20} color="#555" />
                   <Text style={styles.infoText}>{Math.round(humidity ?? 0)}%</Text>
                   <Text style={styles.infoLabel}>Humidity</Text>
                 </View>
-
                 <View style={styles.infoItem}>
                   <Icon name="wind" size={20} color="#555" />
                   <Text style={styles.infoText}>{Math.round(windSpeed ?? 0)} m/s</Text>
@@ -252,6 +267,7 @@ export default function WeatherScreen() {
                 </View>
               </View>
 
+              {/* Button to toggle between Celsius and Fahrenheit */}
               <TouchableOpacity
                 onPress={() => setIsFahrenheit(!isFahrenheit)}
                 style={styles.unitToggle}
@@ -270,6 +286,7 @@ export default function WeatherScreen() {
   );
 }
 
+// Map weather code to emoji for display
 const getWeatherEmoji = (symbol: number): string => {
   const map: { [key: number]: string } = {
     0: "☀️",
@@ -304,6 +321,7 @@ const getWeatherEmoji = (symbol: number): string => {
   return map[symbol] || "❓";
 };
 
+// Styles for the weather screen
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
@@ -363,7 +381,7 @@ const styles = StyleSheet.create({
     color: "#666",
     marginTop: 6,
     textAlign: "center",
-    fontFamily: "System",  // this uses the platform’s default sans-serif font
+    fontFamily: "System", // this uses the platform’s default sans-serif font
     letterSpacing: 1,
   },
   toggle: {

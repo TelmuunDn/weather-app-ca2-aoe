@@ -13,7 +13,9 @@ import {
   View,
 } from "react-native";
 
+// City weather search screen: lets user search for weather by city name
 export default function HomeScreen() {
+  // State variables for city input, search results, UI state, etc.
   const [city, setCity] = useState("");
   const [queriedCity, setQueriedCity] = useState("");
   const [queriedCountry, setQueriedCountry] = useState("");
@@ -27,6 +29,7 @@ export default function HomeScreen() {
     loadSearchHistory();
   }, []);
 
+  // Save a city/country to search history (max 5 entries)
   const saveSearchHistory = async (city: string, country: string) => {
     const cityCountry = `${city}, ${country}`;
     const updated = [cityCountry, ...searchHistory.filter((c) => c !== cityCountry)];
@@ -34,16 +37,19 @@ export default function HomeScreen() {
     await AsyncStorage.setItem("history", JSON.stringify(updated.slice(0, 5)));
   };
 
+  // Load search history from AsyncStorage
   const loadSearchHistory = async () => {
     const history = await AsyncStorage.getItem("history");
     if (history) setSearchHistory(JSON.parse(history));
   };
 
+  // Clear search history from AsyncStorage
   const clearSearchHistory = async () => {
     await AsyncStorage.removeItem("history");
     setSearchHistory([]);
   };
 
+  // Fetch weather for the current city input using geocoding and weather APIs
   const fetchWeatherByCity = async () => {
     if (!city) {
       setError("Please enter a city name.");
@@ -55,6 +61,7 @@ export default function HomeScreen() {
     setTemperature(null);
 
     try {
+      // Geocode city name to get coordinates
       const geocodeRes = await fetch(
         `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(
           city
@@ -71,6 +78,7 @@ export default function HomeScreen() {
       setQueriedCity(location.name);
       setQueriedCountry(location.country);
 
+      // Fetch weather for coordinates
       const now = new Date().toISOString().split(".")[0] + "Z";
       const weatherUrl = `https://api.meteomatics.com/${now}/t_2m:C/${location.latitude},${location.longitude}/json`;
 
@@ -97,6 +105,7 @@ export default function HomeScreen() {
     }
   };
 
+  // Fetch city suggestions for autocomplete (debounced)
   const fetchCitySuggestions = debounce(async (query: string) => {
     if (!query) {
       setCitySuggestions([]);
@@ -119,11 +128,13 @@ export default function HomeScreen() {
     }
   }, 300);
 
+  // Handle user typing in city input
   const handleCityInputChange = (text: string) => {
     setCity(text);
     fetchCitySuggestions(text);
   };
 
+  // Handle Enter key in city input (search or autocomplete)
   const handleCityInputKeyPress = (event: any) => {
     if (event.nativeEvent.key === "Enter") {
       const selectedCity = citySuggestions.find((suggestion) => suggestion.startsWith(city));
@@ -134,6 +145,7 @@ export default function HomeScreen() {
     }
   };
 
+  // Handle user selecting a suggestion from the list
   const handleSuggestionSelect = (suggestion: string) => {
     setCity(suggestion);
     setCitySuggestions([]);
@@ -141,11 +153,13 @@ export default function HomeScreen() {
   };
 
   return (
+    // Gradient background for visual appeal
     <LinearGradient
       colors={["#FFDEE9", "#A0CCDA"]}
       style={{ flex: 1 }}
     >
       <View style={styles.container}>
+        {/* Title and city input */}
         <Text style={styles.title}>🌦️ City Weather Search</Text>
         <View>
           <TextInput
@@ -155,6 +169,7 @@ export default function HomeScreen() {
             onKeyPress={handleCityInputKeyPress}
             placeholder="Enter city name"
           />
+          {/* City suggestions dropdown */}
           {citySuggestions.length > 0 && (
             <View style={styles.suggestionsBubble}>
               <FlatList
@@ -173,14 +188,16 @@ export default function HomeScreen() {
             </View>
           )}
         </View>
+        {/* Loading spinner and error message */}
         {loading && <ActivityIndicator style={{ marginTop: 20 }} />}
         {error ? <Text style={styles.error}>{error}</Text> : null}
+        {/* Weather result display */}
         {temperature !== null && (
           <Text style={styles.result}>
             {queriedCity}, {queriedCountry} - Temperature: {temperature}°C
           </Text>
         )}
-
+        {/* Search history list */}
         {searchHistory.length > 0 && (
           <View style={{ marginTop: 30 }}>
             <Text style={styles.subtitle}>Search History</Text>
@@ -206,6 +223,7 @@ export default function HomeScreen() {
   );
 }
 
+// Styles for the city weather search screen
 const styles = StyleSheet.create({
   container: {
     paddingTop: 80,
@@ -263,10 +281,7 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     borderRadius: 10,
     padding: 10,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
+    boxShadow: "0px 2px 3.84px rgba(0,0,0,0.25)",
     elevation: 5,
     zIndex: 100,
     maxHeight: 110, // Reduced height to make the bubble vertically half as tall
