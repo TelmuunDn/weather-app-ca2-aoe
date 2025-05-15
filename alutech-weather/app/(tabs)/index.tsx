@@ -132,6 +132,7 @@ export default function WeatherScreen() {
     try {
       const { coords } = await Location.getCurrentPositionAsync({});
       if (Platform.OS === "web") {
+        // Using Native Geolocation API for mobile, fallback to OpenStreetMap Nominatim for web as Expo Location is not available on web
         // Use OpenStreetMap Nominatim for reverse geocoding on web
         const response = await fetch(
           `https://nominatim.openstreetmap.org/reverse?format=json&lat=${coords.latitude}&lon=${coords.longitude}`
