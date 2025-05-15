@@ -28,17 +28,29 @@ export default function WeatherScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [fontsLoaded, setFontsLoaded] = useState(false);
 
-  const updateWeatherState = (
-    t: number,
-    h: number,
-    w: number,
-    s: number
-  ) => {
+  // New helper function to format the timestamp as "May-15 10:26"
+  const formatTimestamp = (): string => {
+    const now = new Date();
+    const options: Intl.DateTimeFormatOptions = {
+      month: "short",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    };
+    // Format like "May 15, 10:26" then replace space after month with dash and remove comma
+    return now
+      .toLocaleString("en-US", options)
+      .replace(",", "")
+      .replace(" ", "-");
+  };
+
+  const updateWeatherState = (t: number, h: number, w: number, s: number) => {
     setTemperature(t);
     setHumidity(h);
     setWindSpeed(w);
     setConditionSymbol(s);
-    setTimestamp(new Date().toLocaleString());
+    setTimestamp(formatTimestamp());
   };
 
   const fetchWeather = async (latitude: string, longitude: string) => {
@@ -176,6 +188,8 @@ export default function WeatherScreen() {
             {city || "Loading Local Weather Data..."}
           </Text>
 
+          <Text style={styles.timestamp}>{timestamp}</Text>
+
           {loading && <ActivityIndicator style={{ marginTop: 20 }} />}
           {error ? <Text style={styles.error}>{error}</Text> : null}
 
@@ -217,7 +231,6 @@ export default function WeatherScreen() {
                 </View>
               </View>
 
-              <Text style={styles.timestamp}>As of: {timestamp}</Text>
               <TouchableOpacity
                 onPress={() => setIsFahrenheit(!isFahrenheit)}
                 style={styles.unitToggle}
@@ -288,20 +301,20 @@ const styles = StyleSheet.create({
     marginVertical: 12,
     width: "90%",
   },
-infoItem: {
-  alignItems: "center",
-  justifyContent: "center",
-  marginHorizontal: 8,
-  width: 80, // Optional: add width to better center items
-},
-infoText: {
-  fontSize: 24, // Increased size
-  fontWeight: "600",
-  color: "#333",
-  marginTop: 4,
-  fontFamily: "AlumniSansPinstripe-Regular",
-  textAlign: "center", // Center text
-},
+  infoItem: {
+    alignItems: "center",
+    justifyContent: "center",
+    marginHorizontal: 8,
+    width: 80,
+  },
+  infoText: {
+    fontSize: 24,
+    fontWeight: "600",
+    color: "#333",
+    marginTop: 4,
+    fontFamily: "AlumniSansPinstripe-Regular",
+    textAlign: "center",
+  },
   infoLabel: {
     fontSize: 12,
     color: "#555",
@@ -325,10 +338,12 @@ infoText: {
     textAlign: "center",
   },
   timestamp: {
-    fontSize: 14,
-    color: "#aaa",
-    marginTop: 10,
+    fontSize: 18,
+    color: "#666",
+    marginTop: 6,
     textAlign: "center",
+    fontFamily: "System",  // this uses the platform’s default sans-serif font
+    letterSpacing: 1,
   },
   toggle: {
     color: "#3366FF",
