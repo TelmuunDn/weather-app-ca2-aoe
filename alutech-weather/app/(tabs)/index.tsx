@@ -4,6 +4,7 @@ import * as Location from "expo-location";
 import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
+  Platform,
   RefreshControl,
   ScrollView,
   StyleSheet,
@@ -130,10 +131,29 @@ export default function WeatherScreen() {
   const fetchCity = async () => {
     try {
       const { coords } = await Location.getCurrentPositionAsync({});
-      const [place] = await Location.reverseGeocodeAsync(coords);
-      const cityName = place.city || place.name || "Unknown City";
-      const countryName = place.country || "Unknown Country";
-      setCity(`${cityName}, ${countryName}`);
+      if (Platform.OS === "web") {
+        // Use OpenStreetMap Nominatim for reverse geocoding on web
+        const response = await fetch(
+          `https://nominatim.openstreetmap.org/reverse?format=json&lat=${coords.latitude}&lon=${coords.longitude}`
+        );
+        if (!response.ok) throw new Error("Nominatim request failed");
+        const data = await response.json();
+        const cityName =
+          data.address.city ||
+          data.address.town ||
+          data.address.village ||
+          data.address.hamlet ||
+          data.address.county ||
+          "Unknown City";
+        const countryName = data.address.country || "Unknown Country";
+        setCity(`${cityName}, ${countryName}`);
+      } else {
+        // Use Expo Location reverse geocoding on native
+        const [place] = await Location.reverseGeocodeAsync(coords);
+        const cityName = place.city || place.name || "Unknown City";
+        const countryName = place.country || "Unknown Country";
+        setCity(`${cityName}, ${countryName}`);
+      }
     } catch (err) {
       console.error("Reverse geocoding failed:", err);
       setCity("Unknown City, Unknown Country");
