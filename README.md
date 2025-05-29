@@ -1,3 +1,5 @@
+Luis Ramirez = 2023169; Alejo Santos = 2023197; Telmuun Dunia = 2023306;
+
 
 # 🌤 Weather App (React Native + Expo)
 
